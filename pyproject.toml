@@ -1,0 +1,46 @@
+[project]
+name = "lesson-open-ai-api"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "openai>=1.102.0",
+    "requests>=2.32.5",
+    "sqlalchemy>=2.0.43",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+]
+
+[tool.ruff]
+line-length = 77
+target-version = "py311"
+
+# チェックルール
+lint.select = ["E", "F", "I"]  # E=pycodestyle, F=pyflakes, I=isort
+lint.fixable = ["ALL"]
+
+# ignore dirs
+exclude = [
+    ".venv",
+    ".ruff_cache",
+    ".git",
+    "/*.py"
+]
+
+# 除外したいルール
+lint.ignore = ["E501"]
+
+# 整形設定（ruff format）
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "lf"
+
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
