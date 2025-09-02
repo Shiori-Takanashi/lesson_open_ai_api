@@ -9,7 +9,7 @@ load_dotenv()
 
 class Settings:
     # 環境変数から取得
-    OPEN_AI_API_KEY: str = os.getenv("OPENAI_API_KEY")
+    OPEN_AI_API_KEY: str = os.getenv("OPEN_AI_API_KEY")
 
 
 settings = Settings()
