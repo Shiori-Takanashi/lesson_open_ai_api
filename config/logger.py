@@ -1,4 +1,4 @@
-# prac_open_ai/logger.py
+# config/logger.py
 import logging
 import sys
 from pathlib import Path
