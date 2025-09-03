@@ -1,5 +1,6 @@
 from pathlib import Path
 
+# class設計にして大きく変更。
 
 class DirManager:
     """
