@@ -1,50 +1,74 @@
 from pathlib import Path
 
-def find_project_root(start: Path | None = None) -> Path:
+
+class DirManager:
     """
-    .git が存在するディレクトリを遡って探す。
-    引数 start がファイルならその親から探索を始める。
+    childdirはproject_root/out/childdirという構成。
     """
-    if start is None:
-        start = Path(__file__).resolve(strict=True)
 
-    # ファイルなら親ディレクトリへ
-    if start.is_file():
-        start = start.parent
+    def __init__(self) -> None:
+        self.rootdir: Path | None = None
+        self.parentdir: Path | None = None
+        self.childdir: Path | None = None
 
-    # 上位に向かって探索
-    for path in [start, *start.parents]:
-        if (path / ".git").is_dir():
-            return path
+    def find_project_root(self) -> Path:
+        """
+        呼び出された場所を起点として、上位に向かって.gitがあるproject_rootを探索。
+        """
+        start = Path(__file__).resolve()
 
-    raise FileNotFoundError("プロジェクトルート (.git) が見つかりませんでした")
+        # ファイルなら親ディレクトリへ
+        if start.is_file():
+            start = start.parent
 
-def validate_dirname(child_dirname: str) -> str:
-    invalid_chars = ["/"]
+        # 上位に向かって探索
+        for path in [start, *start.parents]:
+            if (path / ".git").is_dir():
+                path = path.resolve()
+                self.rootdir = path
+                root = path
+                return root
 
-    for invalid_char in invalid_chars:
-        if invalid_char in child_dirname:
-            raise ValueError(f"{child_dirname} is invalid.")
-        else:
-            pass
+        raise FileNotFoundError("プロジェクトルートが見つかりませんでした")
 
-    return child_dirname
+    def setup_parentdir(self) -> None:
+        self.parentdir = self.rootdir / "out"
+        try:
+            self.parentdir.mkdir(exist_ok=True)
+        except Exception as e:
+            raise RuntimeError("Error in making out-DIR.") from e
 
+    def validate_dirname(self, dirname: str) -> str:
+        INVALID_CHARS = ["/", r"\0", "..", " "]
 
+        if not isinstance(dirname, str):
+            obj_type = str(type(dirname))
+            raise ValueError(f"dirname is {obj_type}")
 
-def ensure_outdir_from_dirname(child_dirname: str) -> None:
-    if not child_dirname:
-        raise ValueError(f"child_dirname is '' .")
+        if not dirname:
+            raise ValueError("empty name is invalid.")
 
-    outdirpath: Path | None = None
+        for invalid_char in INVALID_CHARS:
+            if invalid_char in dirname:
+                raise ValueError(
+                    f"{dirname} is invalid. Include {invalid_char}."
+                )
 
-    rootpath = find_project_root()
-    valid_child_dirname = validate_dirname(child_dirname)
-    out_dirpath = rootpath / child_dirname
-    out_dirpath.mkdir(exist_ok=True)
+        return dirname
 
-    return out_dirpath
+    def ensure_parentdir_from_dirname(self, dirname: str) -> None:
+        root = self.find_project_root()
+        valid_dirname = self.validate_dirname(dirname)
+        childdir = root / valid_dirname
 
-def get_outdir_from_dirname() -> Path:
-    out_dirpath = ensure_outdir_form_dirname()
-    return out_dirpath
+        try:
+            childdir.mkdir(exist_ok=True, parents=True)
+        except Exception as e:
+            raise RuntimeError(f"Error in making {childdir.name}.") from e
+
+        self.childdir = childdir
+
+#  % git commit -m "Ignore: outディレクトリは除外"
+# [main 6656f11] Ignore: outディレクトリは除外
+#  2 files changed, 2 insertions(+)
+#  rename utils/{get_path.py => dirmanage.py} (100%)
