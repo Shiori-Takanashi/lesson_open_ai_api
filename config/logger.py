@@ -3,8 +3,9 @@ import logging
 import sys
 from pathlib import Path
 
-LOG_DIR = Path(__file__).resolve().parent / "logs"
+from utils.get_root import find_project_root
 
+LOG_DIR = find_project_root(Path(__file__)) / "logs"
 
 def make_logfile_path() -> Path:
     """実行スクリプトのファイル名からログファイルパスを生成する。"""
