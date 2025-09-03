@@ -7,6 +7,7 @@ from utils.get_root import find_project_root
 
 LOG_DIR = find_project_root(Path(__file__)) / "logs"
 
+
 def make_logfile_path() -> Path:
     """実行スクリプトのファイル名からログファイルパスを生成する。"""
     LOG_DIR.mkdir(exist_ok=True)

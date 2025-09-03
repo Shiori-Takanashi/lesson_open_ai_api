@@ -5,9 +5,9 @@ import subprocess
 from pathlib import Path
 
 # --- 設定 ---
-OUTDIR_NAME = ".gitlog"                 # ルート直下に作成
-OUTFILE_STEM = "gitlog"                 # gitlogNN.txt
-DEFAULT_PRETTY = "%H %cI %d %s"         # ← ハッシュを先頭に
+OUTDIR_NAME = ".gitlog"  # ルート直下に作成
+OUTFILE_STEM = "gitlog"  # gitlogNN.txt
+DEFAULT_PRETTY = "%H %cI %d %s"  # ← ハッシュを先頭に
 ALL_BRANCHES = True
 SINCE: str | None = None
 LIMIT: int | None = None
@@ -30,23 +30,28 @@ def find_project_root(start: Path | None = None) -> Path:
         if (path / ".git").is_dir():
             return path
 
-    raise FileNotFoundError("プロジェクトルート (.git) が見つかりませんでした")
+    raise FileNotFoundError(
+        "プロジェクトルート (.git) が見つかりませんでした"
+    )
+
 
 # --- 採番・出力 ---
 def ensure_dir(p: Path) -> None:
     p.mkdir(parents=True, exist_ok=True)
+
 
 def next_index(dirpath: Path) -> int:
     max_n = -1
     for f in dirpath.glob(f"{OUTFILE_STEM}*.txt"):
         stem = f.stem  # e.g., gitlog03
         if stem.startswith(OUTFILE_STEM):
-            tail = stem[len(OUTFILE_STEM):]
+            tail = stem[len(OUTFILE_STEM) :]
             if tail.isdigit() and len(tail) == 2:
                 n = int(tail)
                 if n > max_n:
                     max_n = n
     return max_n + 1  # 既存なし→0
+
 
 def write_text(text: str, outdir: Path) -> Path:
     ensure_dir(outdir)
@@ -55,11 +60,13 @@ def write_text(text: str, outdir: Path) -> Path:
     outfile.write_text(text, encoding="utf-8", newline="\n")
     return outfile
 
+
 # プレビューから先頭ハッシュを落とす
 def preview_without_hash_first(line: str) -> str:
     s = line.rstrip("\r\n")
     parts = s.split(maxsplit=1)  # 左端だけ分割
     return parts[1] if len(parts) == 2 else s
+
 
 # --- git 実行 ---
 def build_git_log_cmd(
@@ -69,8 +76,10 @@ def build_git_log_cmd(
     limit: int | None = LIMIT,
 ) -> list[str]:
     cmd: list[str] = [
-        "git", "--no-pager",
-        "log", "--no-color",
+        "git",
+        "--no-pager",
+        "log",
+        "--no-color",
         f"--pretty={pretty}",
     ]
     if all_branches:
@@ -81,6 +90,7 @@ def build_git_log_cmd(
         cmd.extend(["-n", str(limit)])
     return cmd
 
+
 def run_git(cmd: list[str], cwd: Path) -> str:
     cp = subprocess.run(
         cmd,
@@ -90,6 +100,7 @@ def run_git(cmd: list[str], cwd: Path) -> str:
         check=True,
     )
     return cp.stdout
+
 
 # --- メイン ---
 def main() -> None:
@@ -111,6 +122,7 @@ def main() -> None:
     first = text.splitlines()[0] if text else ""
     preview = preview_without_hash_first(first)
     print(f"書込: {out.name}\n先頭: {preview[:100]} ...")
+
 
 if __name__ == "__main__":
     main()
